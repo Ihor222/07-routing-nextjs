@@ -1,4 +1,4 @@
-// File: /Users/ihor/Desktop/Work/06-notehub-nextjs/app/page.tsx
+// File: /Users/ihor/Desktop/Work/07-routing-nextjs/app/page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

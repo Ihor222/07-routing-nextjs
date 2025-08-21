@@ -1,4 +1,4 @@
-// File: /Users/ihor/Desktop/Work/06-notehub-nextjs/app/layout.tsx
+// File: /Users/ihor/Desktop/Work/07-routing-nextjs/app/layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
@@ -57,7 +57,7 @@ export interface PageProps {
 }
 export interface LayoutProps {
   children?: React.ReactNode
-
+  modal: React.ReactNode
   params?: Promise<SegmentParams>
 }
 
