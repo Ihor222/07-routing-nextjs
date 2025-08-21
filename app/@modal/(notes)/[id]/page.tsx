@@ -27,3 +27,5 @@ const NotePreview = async ({ params }: Props) => {
     </HydrationBoundary>
   );
 }
+
+export default NotePreview;
