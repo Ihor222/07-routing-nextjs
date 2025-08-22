@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { fetchNotes, FetchNotesResponse } from "@/lib/api";
+import { fetchNotes, type FetchNotesResponse } from "@/lib/api";
+import type { NoteTag } from "@/types/note";
 import SearchBox from "@/components/SearchBox/SearchBox";
 import Pagination from "@/components/Pagination/Pagination";
 import NoteList from "@/components/NoteList/NoteList";
@@ -11,27 +12,28 @@ import Modal from "@/components/Modal/Modal";
 import NoteForm from "@/components/NoteForm/NoteForm";
 import css from "../../../home.modal.css";
 
-interface NotesClientProps {
-  initialData: FetchNotesResponse;
+export interface NotesClientProps {
   initialPage: number;
   initialQuery: string;
+  initialTag: string; // додаємо тег
 }
 
 export default function NotesClient({
-  initialData,
   initialPage,
   initialQuery,
+  initialTag,
 }: NotesClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // Ініціалізація зі значень пропсів
+  // Локальні стани
   const [inputValue, setInputValue] = useState<string>(initialQuery);
   const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
   const [currentPage, setCurrentPage] = useState<number>(initialPage);
+  const [tag, setTag] = useState<string>(initialTag);
 
-  // (Опційно) синхронізація
+  // Синхронізація з пропсами (на випадок зміни маршруту)
   useEffect(() => {
     setInputValue(initialQuery);
     setSearchQuery(initialQuery);
@@ -40,6 +42,10 @@ export default function NotesClient({
   useEffect(() => {
     setCurrentPage(initialPage);
   }, [initialPage]);
+
+  useEffect(() => {
+    setTag(initialTag);
+  }, [initialTag]);
 
   const updateSearchQuery = useDebouncedCallback((value: string) => {
     setSearchQuery(value);
@@ -51,14 +57,12 @@ export default function NotesClient({
     updateSearchQuery(value);
   };
 
+  const effectiveTag: NoteTag | undefined = tag === "All" ? undefined : (tag as NoteTag);
+
   const { data, isLoading } = useQuery<FetchNotesResponse>({
-    queryKey: ["notes", currentPage, searchQuery],
-    queryFn: () => fetchNotes(currentPage, searchQuery),
+    queryKey: ["notes", { page: currentPage, search: searchQuery, tag }],
+    queryFn: () => fetchNotes(currentPage, searchQuery, effectiveTag),
     placeholderData: keepPreviousData,
-    initialData:
-      currentPage === initialPage && searchQuery === initialQuery
-        ? initialData
-        : undefined,
   });
 
   const totalPages = data?.totalPages ?? 0;

@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { Note, NoteTag } from "@/types/note";
 
-axios.defaults.baseURL = 'https://notehub-public.goit.study/api';
+axios.defaults.baseURL = "https://notehub-public.goit.study/api";
 const myKey = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
 
 if (!myKey) {
@@ -19,11 +19,20 @@ export interface NewNote {
   tag: NoteTag;
 }
 
-export const fetchNotes = async (page: number, search: string): Promise<FetchNotesResponse> => {
+//  fetchNotes тепер підтримує tag
+export const fetchNotes = async (
+  page: number,
+  search: string,
+  tag?: NoteTag
+): Promise<FetchNotesResponse> => {
   const params: Record<string, string | number> = { page };
 
   if (search.trim()) {
     params.search = search.trim();
+  }
+
+  if (tag) {
+    params.tag = tag; // додаємо tag у query string
   }
 
   try {
