@@ -15,7 +15,7 @@ import css from "../../../home.modal.css";
 export interface NotesClientProps {
   initialPage: number;
   initialQuery: string;
-  initialTag: string; // додаємо тег
+  initialTag: NoteTag | "All"; // суворіше
 }
 
 export default function NotesClient({
@@ -27,13 +27,10 @@ export default function NotesClient({
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // Локальні стани
   const [inputValue, setInputValue] = useState<string>(initialQuery);
   const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
   const [currentPage, setCurrentPage] = useState<number>(initialPage);
-  const [tag, setTag] = useState<string>(initialTag);
 
-  // Синхронізація з пропсами (на випадок зміни маршруту)
   useEffect(() => {
     setInputValue(initialQuery);
     setSearchQuery(initialQuery);
@@ -42,10 +39,6 @@ export default function NotesClient({
   useEffect(() => {
     setCurrentPage(initialPage);
   }, [initialPage]);
-
-  useEffect(() => {
-    setTag(initialTag);
-  }, [initialTag]);
 
   const updateSearchQuery = useDebouncedCallback((value: string) => {
     setSearchQuery(value);
@@ -57,15 +50,17 @@ export default function NotesClient({
     updateSearchQuery(value);
   };
 
-  const effectiveTag: NoteTag | undefined = tag === "All" ? undefined : (tag as NoteTag);
+  const effectiveTag: NoteTag | undefined =
+    initialTag === "All" ? undefined : initialTag;
 
   const { data, isLoading } = useQuery<FetchNotesResponse>({
-    queryKey: ["notes", { page: currentPage, search: searchQuery, tag }],
+    queryKey: ["notes", { page: currentPage, search: searchQuery, tag: initialTag }],
     queryFn: () => fetchNotes(currentPage, searchQuery, effectiveTag),
     placeholderData: keepPreviousData,
   });
 
   const totalPages = data?.totalPages ?? 0;
+  const notes = data?.notes ?? [];
 
   return (
     <div className={css.app}>
@@ -85,8 +80,13 @@ export default function NotesClient({
 
       {isLoading ? (
         <p className={css.loading}>Loading notes...</p>
+      ) : notes.length > 0 ? (
+        <NoteList notes={notes} />
       ) : (
-        <NoteList notes={data?.notes ?? []} />
+        <p>
+          No notes found
+          {initialTag !== "All" ? ` for tag "${initialTag}"` : ""}.
+        </p>
       )}
 
       {isModalOpen && (

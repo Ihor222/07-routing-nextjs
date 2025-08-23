@@ -4,14 +4,16 @@ import type { NoteTag } from "@/types/note";
 import NotesClient from "./Notes.client";
 
 type PageProps = {
-  params: Promise<{ slug: string[] }>;
+  params: Promise<{ slug?: string[] }>;
 };
 
 export default async function NotesFilterPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const rawTag = slug?.[0] ?? "All";
-  const effectiveTag: NoteTag | undefined = rawTag === "All" ? undefined : (rawTag as NoteTag);
+  const rawTag: "All" | NoteTag = slug?.[0] ? (slug[0] as NoteTag) : "All";
+
+  const effectiveTag: NoteTag | undefined =
+    rawTag === "All" ? undefined : rawTag;
 
   const pageStart = 1;
   const searchTerm = "";
